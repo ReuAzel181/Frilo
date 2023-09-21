@@ -1,0 +1,17 @@
+    def bubble_sort(numbers):
+
+    largest = numbers[0]
+
+    for i in range(1, len(numbers)):
+        if numbers[i] > largest:
+        largest = numbers[i]
+
+    return largest
+
+    user_input = input("Enter a numbers separated by spaces: ")
+
+    numbers = list(map(int, user_input.split()))
+
+    largest_number = bubble_sort(numbers)
+
+    print("The largest number is:", largest_number)
