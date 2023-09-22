@@ -1,2 +1,3 @@
 # bubble_sort
-Bubble Sort na di ko maintindihan kung pano nag work
+Bubble Sort na di ko maintindihan kung pano nag work. Pang streak lang huhi
+
