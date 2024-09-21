@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PetFurme</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="sign_in">Sign In</string>
+    <string name="don_t_have_an_account_sign_up">Don\'t have an account? Sign Up</string>
+    <string name="name">Name</string>
 </resources>
