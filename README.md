@@ -1,3 +1,3 @@
-# bubble_sort
-Bubble Sort na di ko maintindihan kung pano nag work. 
+# Android application for Client
+PARA SA THESIS NAMIN TOOOOOO
 
