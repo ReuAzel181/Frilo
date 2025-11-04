@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../lib/mongodb';
-import Submission from '../../../models/Submission';
+import dbConnect from '@/lib/db';
+import Submission from '@/models/Submission';
 import { getToken } from 'next-auth/jwt';
 
 export async function POST(req: NextRequest) {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  await connectToDatabase();
+  await dbConnect();
 
   const { submissionId } = await req.json();
   const userId = token.sub;

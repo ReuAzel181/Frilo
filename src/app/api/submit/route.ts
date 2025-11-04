@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/db';
+import dbConnect from '@/lib/db';
 import Submission from '@/models/Submission';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
 
 export async function POST(req: NextRequest) {
-  await connectToDatabase();
+  await dbConnect();
 
   const token = req.cookies.get('token')?.value;
   if (!token) {

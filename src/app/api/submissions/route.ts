@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '../../../lib/mongodb';
-import Submission from '../../../models/Submission';
+import dbConnect from '@/lib/db';
+import Submission from '@/models/Submission';
 
 export async function GET(req: NextRequest) {
-  await connectToDatabase();
+  await dbConnect();
 
   try {
     const submissions = await Submission.find({}).populate('user', 'name email').sort({ createdAt: -1 });
