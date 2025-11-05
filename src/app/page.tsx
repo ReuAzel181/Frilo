@@ -15,29 +15,22 @@ export default function Home() {
 
   const { isAuthenticated, logout } = authContext;
 
+  type SectionImage = {
+    id: string;
+    url: string;
+    label: string;
+    description?: string | null;
+    tags: any;
+    createdAt: string;
+  };
+
   const [templates, setTemplates] = useState<Template[]>([]);
   const [sortOrder, setSortOrder] = useState('Newest First');
   const [activeStyle, setActiveStyle] = useState('Latest');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchSubmissions = async () => {
-      try {
-        const response = await fetch('/api/submissions');
-        if (response.ok) {
-          const data = await response.json();
-          setTemplates(data);
-        } else {
-          console.error('Failed to fetch submissions');
-        }
-      } catch (error) {
-        console.error('Error fetching submissions:', error);
-      }
-    };
-
-    fetchSubmissions();
-  }, []);
+  const [images, setImages] = useState<SectionImage[]>([]);
+  const [layout, setLayout] = useState('Compact');
 
   const handleFavorite = async (submissionId: string) => {
     if (!isAuthenticated) {
@@ -81,6 +74,8 @@ export default function Home() {
     }
   };
 
+
+
   const filteredTemplates = useMemo(() => {
     // Create a shallow copy to sort, to avoid mutating the original `templates` array.
     let filtered = [...templates];
@@ -107,7 +102,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-8">
             <div className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              UNSECTION
+              FRILO
             </div>
             <nav className="hidden lg:flex space-x-6">
               <Link href="#" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Discover</Link>
@@ -182,21 +177,58 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Style Filter Tags - Unsection-style */}
-      <section className="container mx-auto px-4 py-6 border-b border-gray-200 dark:border-gray-800">
-          <div className="flex items-center space-x-2 bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full px-2 py-1">
-            {['Latest', 'Favorite', 'Followed'].map((style) => (
-              <button 
-                key={style}
-                onClick={() => setActiveStyle(style)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeStyle === style ? 'bg-yellow-400 text-black' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700'}`}>
-                {style}
-              </button>
-            ))}
-          </div>
-        </section>
 
-      {/* Template Grid - Webflow-style cards */}
+
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const res = await fetch('/api/sections');
+        if (res.ok) {
+          const data = await res.json();
+          setImages(data);
+        }
+      } catch (err) {
+        console.error('Error fetching community images', err);
+      }
+    };
+    fetchImages();
+  }, []);
+
+      {/* Community Images Grid */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold">Community Images</h2>
+          <div className="flex items-center space-x-2">
+            <button onClick={() => setLayout('Compact')} className={`px-3 py-1 rounded-full text-sm font-medium ${layout === 'Compact' ? 'bg-yellow-400 text-black' : 'bg-gray-200 dark:bg-gray-800'}`}>Compact</button>
+            <button onClick={() => setLayout('Expanded')} className={`px-3 py-1 rounded-full text-sm font-medium ${layout === 'Expanded' ? 'bg-yellow-400 text-black' : 'bg-gray-200 dark:bg-gray-800'}`}>Expanded</button>
+            <button className="px-3 py-1 rounded-full text-sm font-medium bg-gray-200 dark:bg-gray-800">Featured</button>
+            <button className="px-3 py-1 rounded-full text-sm font-medium bg-gray-200 dark:bg-gray-800">New</button>
+            <button className="px-3 py-1 rounded-full text-sm font-medium bg-gray-200 dark:bg-gray-800">Popular</button>
+          </div>
+        </div>
+        <div className={`grid gap-8 ${layout === 'Compact' ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-5' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+          {images.map((item) => (
+            <div key={item.id} className="group relative bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-yellow-400 transition-all">
+              <div className="aspect-video bg-gray-100 dark:bg-gray-800">
+                <img src={item.url} alt={item.label} className="w-full h-full object-cover" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-2 group-hover:text-yellow-400 transition-colors">{item.label}</h3>
+                {item.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{item.description}</p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(item.tags) ? item.tags.map((t: any, i: number) => (
+                    <span key={i} className="px-2 py-1 bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-full">{String(t)}</span>
+                  )) : null}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="container mx-auto px-4 py-12">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Latest Sections</h2>
@@ -207,8 +239,9 @@ export default function Home() {
               onChange={(e) => setSortOrder(e.target.value)}
               className="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2 text-black dark:text-white"
             >
-              <option>Newest First</option>
-              <option>Oldest First</option>
+              <option>Latest</option>
+              <option>Favorite</option>
+              <option>Followed</option>
             </select>
           </div>
         </div>
@@ -336,7 +369,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
             <div className="md:col-span-2">
               <div className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-4">
-                UNSECTION
+                FRILO
               </div>
               <p className="text-gray-500 dark:text-gray-400 max-w-xs">
                 A curated collection of the best website sections and components from around the web.
@@ -368,7 +401,7 @@ export default function Home() {
             </div>
           </div>
           <div className="text-center text-gray-500 dark:text-gray-400 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <p>&copy; {new Date().getFullYear()} UNSECTION. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} FRILO. All rights reserved.</p>
           </div>
         </div>
       </footer>

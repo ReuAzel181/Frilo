@@ -1,165 +1,179 @@
-"use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+'use client';
 
-const LABELS = ["Header", "Footer", "Hero", "Feature", "Contact", "CTA", "Pricing", "FAQ", "Testimonial"];
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from './cropImage'; // Helper function to get cropped image
+
+// Define the type for the image data
+type SectionImage = {
+  id: string;
+  url: string;
+  label: string;
+  description?: string | null;
+  tags: any;
+  createdAt: string;
+};
 
 export default function UploadPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [label, setLabel] = useState<string>(LABELS[0]);
-  const [description, setDescription] = useState<string>("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState<string>("");
-  const dropRef = useRef<HTMLDivElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [label, setLabel] = useState("");
+  const [description, setDescription] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const router = useRouter();
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
 
-  useEffect(() => {
-    const handler = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const blob = item.getAsFile();
-          if (blob) {
-            setFile(blob);
-            setPreview(URL.createObjectURL(blob));
-            break;
-          }
-        }
-      }
-    };
-    window.addEventListener("paste", handler as any);
-    return () => window.removeEventListener("paste", handler as any);
+  const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    const f = e.dataTransfer.files?.[0];
-    if (f) {
-      setFile(f);
-      setPreview(URL.createObjectURL(f));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setImageSrc(reader.result as string);
+      });
+      reader.readAsDataURL(file);
     }
-  }, []);
-
-  const onSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-    setPreview(f ? URL.createObjectURL(f) : null);
   };
 
-  const onSubmit = async () => {
-    if (!file) return alert("Please select an image");
-    const form = new FormData();
-    form.set("file", file);
-    form.set("label", label);
-    form.set("description", description);
-    form.set("tags", JSON.stringify(tags));
-    const res = await fetch("/api/upload", { method: "POST", body: form });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      alert("Upload failed: " + (err.error || res.statusText));
+  const handleUploadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFile) {
+      alert('Please select an image file to upload');
       return;
     }
-    const json = await res.json();
-    alert("Uploaded!");
-    setFile(null);
-    setPreview(null);
-    setDescription("");
-    setTags([]);
-    setTagInput("");
-    console.log("created", json);
+    setUploading(true);
+    try {
+      const croppedImage = await getCroppedImg(
+        imageSrc!,
+        croppedAreaPixels!,
+        0
+      );
+
+      const formData = new FormData();
+      // @ts-ignore
+      formData.append('file', croppedImage, selectedFile.name);
+      formData.append('label', label);
+      formData.append('description', description);
+      const tagsArray = tagsInput
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean);
+      formData.append('tags', JSON.stringify(tagsArray));
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Upload failed');
+      }
+
+      alert('Image uploaded successfully');
+      window.location.href = '/';
+    } catch (err) {
+      console.error('Upload error', err);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <div className="mx-auto max-w-3xl p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload / Paste Design Section</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="text-sm text-gray-600">Drag-and-drop, paste, or choose a file. Label the section and add optional tags.</p>
-
-      <div
-        ref={dropRef}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={onDrop}
-        className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-3 bg-gray-50 hover:bg-gray-100 transition"
-      >
-        <input type="file" accept="image/*" onChange={onSelect} className="hidden" id="file-input" />
-        <Button onClick={() => document.getElementById("file-input")?.click()}>Choose Image</Button>
-        <span className="text-xs text-gray-500">or drop/paste an image here</span>
-        {preview && (
-          <motion.img
-            src={preview}
-            alt="preview"
-            className="mt-3 max-h-64 rounded border"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          />
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md-grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm mb-1">Section Label</label>
-          <Select value={label} onValueChange={(v) => setLabel(v)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a label" />
-            </SelectTrigger>
-            <SelectContent>
-              {LABELS.map((l) => (
-                <SelectItem key={l} value={l}>{l}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <label className="block text-sm mb-1">Tags</label>
-          <Input
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && tagInput.trim()) {
-                setTags((prev) => Array.from(new Set([...prev, tagInput.trim()])));
-                setTagInput("");
-                e.preventDefault();
-              }
-            }}
-            placeholder="Type a tag and press Enter"
-          />
-          {tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {tags.map((t) => (
-                <Badge key={t} className="cursor-pointer" onClick={() => setTags((prev) => prev.filter((x) => x !== t))} title="Click to remove">
-                  {t}
-                </Badge>
-              ))}
+    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
+      <header className="border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-black/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-8">
+            <div className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              <a href="/">FRILO</a>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-
-      <Separator />
-      <div>
-        <label className="block text-sm mb-1">Description (optional)</label>
-        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Briefly describe this section" />
-      </div>
-
-      <div className="flex gap-3">
-        <Button onClick={onSubmit} disabled={!file}>Upload & Save</Button>
-        <Button variant="outline" asChild>
-          <a href="/gallery">Go to Gallery</a>
-        </Button>
-      </div>
-        </CardContent>
-      </Card>
+      </header>
+      <section className="container mx-auto px-4 py-8">
+        <div className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
+          <h2 className="text-2xl font-bold mb-4">Add Your Image</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Upload an image and tag it. It will appear on the homepage in the Community Images section.</p>
+          <form onSubmit={handleUploadSubmit} className="space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <label className="block text-sm mb-2">Image File</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2"
+                />
+              </div>
+            </div>
+            {imageSrc && (
+              <div className="relative h-96 bg-gray-200 dark:bg-gray-800 rounded-lg my-4">
+                <Cropper
+                  image={imageSrc}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={16 / 9}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                />
+              </div>
+            )}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <label className="block text-sm mb-2">Label</label>
+                <input
+                  type="text"
+                  value={label}
+                  onChange={(e) => setLabel(e.target.value)}
+                  placeholder="e.g., Hero Section"
+                  className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm mb-2">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional description"
+                rows={3}
+                className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-2">Tags (comma-separated)</label>
+              <input
+                type="text"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                placeholder="e.g., hero, gradient, minimal"
+                className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={uploading}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-3 rounded-full transition-all transform hover:scale-105 disabled:opacity-60"
+              >
+                {uploading ? 'Uploading…' : 'Upload Image'}
+              </button>
+              {selectedFile && (
+                <span className="text-sm text-gray-600 dark:text-gray-400">Selected: {selectedFile.name}</span>
+              )}
+            </div>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }
