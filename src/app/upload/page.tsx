@@ -88,20 +88,19 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-      <header className="border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-black/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-8">
-            <div className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-              <a href="/">FRILO</a>
-            </div>
-          </div>
+    <>
+      {/* Hero Section */}
+      <section>
+        <div className="max-w-3xl mx-auto">
+          <h1 className="font-bold mb-4">Upload Image</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-10">Upload an image and tag it. It will appear on the homepage in the Community Images section.</p>
         </div>
-      </header>
-      <section className="container mx-auto px-4 py-8">
+      </section>
+
+      {/* Form Section */}
+      <section>
         <div className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-          <h2 className="text-2xl font-bold mb-4">Add Your Image</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Upload an image and tag it. It will appear on the homepage in the Community Images section.</p>
+          <h2 className="font-bold mb-4">Add Your Image</h2>
           <form onSubmit={handleUploadSubmit} className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -159,7 +158,7 @@ export default function UploadPage() {
                 className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-2"
               />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4 buttons-inline">
               <button
                 type="submit"
                 disabled={uploading}
@@ -174,6 +173,6 @@ export default function UploadPage() {
           </form>
         </div>
       </section>
-    </div>
+    </>
   );
 }

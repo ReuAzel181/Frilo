@@ -30,9 +30,9 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center">
-      <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-4xl font-bold mb-6 text-center">Sign Up</h1>
+    <section>
+      <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-md mx-auto">
+        <h1 className="font-bold mb-4 text-center">Sign Up</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2" htmlFor="username">Username</label>
@@ -64,15 +64,17 @@ const SignUpPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-3 rounded-full transition-all transform hover:scale-105">
-            Sign Up
-          </button>
+          <div className="gap-before-buttons">
+            <button type="submit" className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-3 rounded-full transition-all transform hover:scale-105">
+              Sign Up
+            </button>
+          </div>
         </form>
         <p className="text-center text-gray-400 mt-6">
           Already have an account? <Link href="/signin" className="text-yellow-400 hover:underline">Sign In</Link>
         </p>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const label = String(formData.get("label") || "");
     const description = String(formData.get("description") || "");
     const tagsRaw = String(formData.get("tags") || "[]");
-    const tags = safeParseJsonArray(tagsRaw);
+    const tags = safeParseStringArray(tagsRaw);
 
     if (!(file instanceof Blob)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -46,10 +46,13 @@ export async function POST(req: Request) {
   }
 }
 
-function safeParseJsonArray(input: string): any[] {
+function safeParseStringArray(input: string): string[] {
   try {
     const v = JSON.parse(input);
-    return Array.isArray(v) ? v : [];
+    if (Array.isArray(v)) {
+      return v.map((x) => String(x));
+    }
+    return [];
   } catch {
     return [];
   }

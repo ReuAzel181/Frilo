@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
-import Submission from '@/models/Submission';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
-  await dbConnect();
-
   try {
-    const submissions = await Submission.find({}).populate('user', 'name email').sort({ createdAt: -1 });
+    const submissions = await prisma.submission.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { username: true, email: true } } },
+    });
     return NextResponse.json(submissions, { status: 200 });
   } catch (error) {
     console.error('Error fetching submissions:', error);

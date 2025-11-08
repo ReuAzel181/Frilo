@@ -2,19 +2,25 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const label = searchParams.get("label") || undefined;
-  const tag = searchParams.get("tag") || undefined;
+  try {
+    const { searchParams } = new URL(req.url);
+    const label = searchParams.get("label") || undefined;
+    const tag = searchParams.get("tag") || undefined;
 
-  const where: any = {};
-  if (label) where.label = label;
-  if (tag) where.tags = { array_contains: tag };
+    const where: any = {};
+    if (label) where.label = label;
+    if (tag) where.tags = { has: tag };
 
-  const items = await prisma.sectionImage.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(items);
+    const items = await prisma.sectionImage.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(items);
+  } catch (e) {
+    console.error("/api/sections GET", e);
+    // Gracefully degrade to an empty array so the UI can still render.
+    return NextResponse.json([], { status: 200 });
+  }
 }
 
 export async function POST(req: Request) {

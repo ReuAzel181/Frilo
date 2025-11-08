@@ -30,9 +30,9 @@ export default function SignIn() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center">Sign In</h1>
+    <section>
+      <div className="w-full max-w-md mx-auto p-8 space-y-6 bg-gray-800 rounded-lg shadow-lg">
+        <h1 className="font-bold text-center mb-4">Sign In</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium">Email</label>
@@ -54,12 +54,14 @@ export default function SignIn() {
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Sign In
-          </button>
+          <div className="gap-before-buttons">
+            <button
+              type="submit"
+              className="w-full py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Sign In
+            </button>
+          </div>
         </form>
         <p className="text-sm text-center">
           Don&apos;t have an account?{' '}
@@ -68,6 +70,6 @@ export default function SignIn() {
           </Link>
         </p>
       </div>
-    </div>
+    </section>
   );
 }

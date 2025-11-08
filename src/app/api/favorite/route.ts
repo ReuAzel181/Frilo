@@ -1,48 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
-import Submission from '@/models/Submission';
-import { getToken } from 'next-auth/jwt';
+import jwt from 'jsonwebtoken';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-  const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret) {
-    return NextResponse.json({ error: 'NEXTAUTH_SECRET is not set' }, { status: 500 });
-  }
-  const token = await getToken({ req, secret });
-
-  if (!token) {
+  const jwtSecret = process.env.JWT_SECRET;
+  const cookieToken = req.cookies.get('token')?.value;
+  if (!jwtSecret || !cookieToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  await dbConnect();
+  let userId: string | null = null;
+  try {
+    const decoded = jwt.verify(cookieToken, jwtSecret) as { id?: string };
+    userId = decoded.id || null;
+  } catch (e) {
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  }
 
   const { submissionId } = await req.json();
-  const userId = token.sub;
 
   if (!submissionId || !userId) {
     return NextResponse.json({ error: 'Missing submissionId or userId' }, { status: 400 });
   }
 
   try {
-    const submission = await Submission.findById(submissionId);
+    const existing = await prisma.submission.findUnique({
+      where: { id: submissionId },
+      select: { favorites: { where: { id: userId }, select: { id: true } } },
+    });
 
-    if (!submission) {
+    if (!existing) {
       return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
     }
 
-    const userIndex = submission.favorites.indexOf(userId);
+    const isFavorited = existing.favorites.length > 0;
 
-    if (userIndex > -1) {
-      // User has already favorited, so unfavorite
-      submission.favorites.splice(userIndex, 1);
-    } else {
-      // User has not favorited, so favorite
-      submission.favorites.push(userId);
-    }
+    await prisma.submission.update({
+      where: { id: submissionId },
+      data: {
+        favorites: isFavorited
+          ? { disconnect: { id: userId } }
+          : { connect: { id: userId } },
+      },
+    });
 
-    await submission.save();
-
-    return NextResponse.json({ message: 'Favorite status updated' }, { status: 200 });
+    return NextResponse.json({ message: 'Favorite status updated', favorited: !isFavorited }, { status: 200 });
   } catch (error) {
     console.error('Error updating favorite status:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

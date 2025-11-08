@@ -53,11 +53,12 @@ export default function GalleryPage() {
   }, [items, search]);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Gallery</h1>
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-3 items-center">
+    <>
+      {/* Hero Section */}
+      <section>
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="font-bold mb-4">Gallery</h1>
+          <div className="flex flex-wrap gap-4 justify-center">
             <Select value={labelFilter} onValueChange={(v) => setLabelFilter(v)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter label" />
@@ -69,47 +70,54 @@ export default function GalleryPage() {
               </SelectContent>
             </Select>
             <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by tag or text" className="flex-1 min-w-[200px]" />
-            <Button variant="outline" asChild>
-              <a href="/upload">Upload New</a>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {loading && Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="h-40 rounded border bg-gray-100 animate-pulse" />
-        ))}
-        {!loading && filtered.length === 0 && (
-          <div className="col-span-full text-center text-sm text-gray-600">No items match your filters.</div>
-        )}
-        {!loading && filtered.map(item => (
-          <motion.div
-            key={item.id}
-            className="group relative cursor-pointer"
-            onClick={() => setSelected(item)}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <img src={item.url} alt={item.label} className="w-full h-40 object-cover rounded border" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-end p-2">
-              <div className="text-white text-sm">
-                <div className="font-medium">{item.label}</div>
-                {item.description && <div className="line-clamp-2 text-xs">{item.description}</div>}
-              </div>
+            <div className="buttons-inline">
+              <Button variant="outline" asChild>
+                <a href="/upload">Upload New</a>
+              </Button>
             </div>
-          </motion.div>
-        ))}
-      </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Results Section */}
+      <section>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gutter-default">
+          {loading && Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-40 rounded border bg-gray-100 animate-pulse" />
+          ))}
+          {!loading && filtered.length === 0 && (
+            <div className="col-span-full text-center text-sm text-gray-600">No items match your filters.</div>
+          )}
+          {!loading && filtered.map(item => (
+            <motion.div
+              key={item.id}
+              className="group relative cursor-pointer"
+              onClick={() => setSelected(item)}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            >
+              <img src={item.url} alt={item.label} className="w-full h-40 object-cover rounded border" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-end p-2">
+                <div className="text-white text-sm">
+                  <h5 className="font-semibold">{item.label}</h5>
+                  {item.description && <div className="line-clamp-2 text-xs">{item.description}</div>}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent className="max-w-3xl">
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle>{selected.label}</DialogTitle>
+                <DialogTitle asChild>
+                  <h5 className="font-semibold">{selected.label}</h5>
+                </DialogTitle>
                 {selected.description && (
                   <DialogDescription>{selected.description}</DialogDescription>
                 )}
@@ -132,6 +140,6 @@ export default function GalleryPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

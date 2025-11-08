@@ -1,22 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
-import User from '@/models/User';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-  await dbConnect();
-
   try {
     const { username, email, password } = await req.json();
 
-    const user = await User.create({ username, email, password });
+    if (!username || !email || !password) {
+      return NextResponse.json({ success: false, error: 'Missing fields' }, { status: 400 });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 409 });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(password, salt);
+
+    const user = await prisma.user.create({ data: { username, email, password: hashed } });
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', {
       expiresIn: '1d',
     });
 
     return NextResponse.json({ success: true, token }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message || 'Error' }, { status: 400 });
   }
 }

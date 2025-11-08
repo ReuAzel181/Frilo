@@ -35,10 +35,9 @@ export default function SubmitPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center">Submit a Section</h1>
+    <section>
+      <div className="max-w-2xl mx-auto">
+          <h1 className="font-bold mb-4 text-center">Submit a Section</h1>
           {error && <p className="text-red-500 text-center mb-4">{error}</p>}
           {success && <p className="text-green-500 text-center mb-4">{success}</p>}
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -75,7 +74,7 @@ export default function SubmitPage() {
                 required
               />
             </div>
-            <div className="text-center">
+            <div className="text-center gap-before-buttons">
               <button
                 type="submit"
                 className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-8 py-3 rounded-full transition-all transform hover:scale-105"
@@ -85,7 +84,6 @@ export default function SubmitPage() {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+    </section>
   );
 }

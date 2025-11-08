@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import connectDB from '@/lib/db';
-import User from '@/models/User';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-  await connectDB();
-
   const { email, password } = await req.json();
 
   if (!email || !password) {
@@ -14,7 +11,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 400 });
     }
@@ -24,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 400 });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
       expiresIn: '1h',
     });
 

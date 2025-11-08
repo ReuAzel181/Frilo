@@ -119,4 +119,92 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Design System: Typography (Desktop & Mobile) */
+  /* Desktop sizes */
+  h1 { font-size: 48px; line-height: 56px; }
+  h2 { font-size: 40px; line-height: 48px; }
+  h3 { font-size: 32px; line-height: 40px; }
+  h4 { font-size: 23px; line-height: 31px; }
+  h5 { font-size: 20px; line-height: 28px; }
+  h6 { font-size: 18px; line-height: 26px; }
+  p, .body-text { font-size: 16px; line-height: 24px; }
+
+  /* Mobile sizes */
+  @media (max-width: 640px) {
+    h1 { font-size: 40px; line-height: 48px; }
+    h2 { font-size: 32px; line-height: 40px; }
+    h3 { font-size: 24px; line-height: 32px; }
+    h4 { font-size: 20px; line-height: 28px; }
+    h5 { font-size: 18px; line-height: 26px; }
+    h6 { font-size: 18px; line-height: 26px; }
+  }
+
+  /* Section Rules: vertical stacking, padding, alternating backgrounds */
+  /* Apply section padding even when sections are nested in wrappers */
+  main section {
+    padding-top: 120px;
+    padding-bottom: 80px;
+    background-color: #ffffff;
+  }
+
+  @media (max-width: 640px) {
+    main section {
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+  }
+
+  /* Alternating padding for stacked sections */
+  main section:nth-of-type(2) {
+    padding-top: 80px;
+    padding-bottom: 120px;
+    background-color: #ffffff;
+  }
+
+  main section:nth-of-type(3) {
+    padding-top: 120px;
+    padding-bottom: 120px;
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  /* Containers & Layout Widths */
+  .container-expanded {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 56px;
+    padding-right: 56px;
+  }
+
+  .container-compact {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 156px;
+    padding-right: 156px;
+  }
+
+  @media (max-width: 640px) {
+    .container-expanded,
+    .container-compact {
+      max-width: 328px;
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  /* Gutters */
+  .gutter-default { gap: 32px; }
+  .gutter-alt { gap: 16px; }
+
+  /* Subheading & Gap Rules */
+  .subheading { font-size: 16px; font-weight: 700; }
+  .gap-subheading-title { margin-bottom: 8px; }
+  .gap-title-body { margin-bottom: 16px; }
+  .gap-before-buttons { margin-bottom: 40px; }
+  .buttons-inline { display: flex; gap: 16px; }
+
+  /* Utility: remove horizontal padding for full-bleed sections */
+  .no-side-padding { padding-left: 0 !important; padding-right: 0 !important; }
 }
