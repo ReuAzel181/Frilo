@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+export const runtime = "nodejs";
 
 type Params = { params: { id: string } };
 
 export async function GET(_: Request, { params }: Params) {
-  const item = await prisma.sectionImage.findUnique({ where: { id: params.id } });
-  return item ? NextResponse.json(item) : NextResponse.json({ error: "Not found" }, { status: 404 });
+  try {
+    const item = await prisma.sectionImage.findUnique({ where: { id: params.id } });
+    return item ? NextResponse.json(item) : NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (e) {
+    console.error("/api/sections/[id] GET", e);
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
 }
 
 export async function PUT(req: Request, { params }: Params) {
@@ -28,6 +34,11 @@ export async function PUT(req: Request, { params }: Params) {
 }
 
 export async function DELETE(_: Request, { params }: Params) {
-  await prisma.sectionImage.delete({ where: { id: params.id } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.sectionImage.delete({ where: { id: params.id } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("/api/sections/[id] DELETE", e);
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
 }

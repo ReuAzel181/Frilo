@@ -66,7 +66,13 @@ export default function CommunityImages() {
           {!loading && items.map((item) => (
             <div key={item.id} className="group relative bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 hover:border-yellow-400 transition-all">
               <div className="aspect-video bg-gray-100 dark:bg-gray-800">
-                <Image src={item.url} alt={item.label} width={640} height={360} className="w-full h-full object-cover" />
+                <Image
+                  src={(item.url || "").trim().replace(/^['"`\s]+|['"`\s]+$/g, "").replace(/\)+$/, "")}
+                  alt={item.label}
+                  width={640}
+                  height={360}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="p-6">
                 <h5 className="font-semibold mb-2 group-hover:text-yellow-400 transition-colors">{item.label}</h5>
