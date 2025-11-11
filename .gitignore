@@ -1,5 +1,63 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# --- Node.js & general ---
+node_modules/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Next.js ---
+.next/
+.next/cache/
+out/
+dist/
+build/
+
+# --- TypeScript ---
+*.tsbuildinfo
+
+# --- Testing & coverage ---
+coverage/
+
+# --- Environment files ---
 .env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+
+# --- Editors/IDE ---
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# --- Prisma ---
+prisma/*.db
+prisma/*.db-journal
+# If you generate Prisma client into src/prisma-client and prefer not committing it,
+# uncomment the next line (currently tracked in this repo, so left commented):
+# src/prisma-client/
+
+# --- Supabase local ---
+.supabase/
+
+# --- Misc ---
+*.swp
+*.swo
+tmp/
+temp/
 .env.test
 .env.local
 
